@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>扫码记录</title>
+    <style>
+        /* 页面整体样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f5f7;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            color: #333;
+        }
+
+        /* 中间文字样式 */
+        .center-content {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        /* 强调数字的样式 */
+        .highlight {
+            color: #007AFF; /* 苹果蓝 */
+            font-size: 32px;
+            margin: 0 5px;
+        }
+
+        /* 底部时间样式 */
+        .bottom-content {
+            position: absolute;
+            bottom: 30px;
+            font-size: 14px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 屏幕中间显示区域 -->
+    <div class="center-content">
+        这是您今天第<span id="scanCount" class="highlight">0</span>次扫码
+    </div>
+
+    <!-- 屏幕下方显示区域 -->
+    <div class="bottom-content" id="bjTime">
+        北京时间：加载中...
+    </div>
+
+    <script>
+        // 1. 获取并格式化当前北京时间的日期（用于判断是否跨天）
+        function getBeijingDate() {
+            const now = new Date();
+            // 强制转换为东八区（北京时间）的日期字符串，格式如：2026-04-14
+            return new Intl.DateTimeFormat('zh-CN', {
+                timeZone: 'Asia/Shanghai',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(now).replace(/\//g, '-');
+        }
+
+        // 2. 扫码次数统计逻辑
+        function updateScanCount() {
+            const today = getBeijingDate();
+            let storedDate = localStorage.getItem('lastScanDate');
+            let count = localStorage.getItem('todayScanCount');
+
+            if (storedDate === today) {
+                // 如果是今天，次数 +1
+                count = parseInt(count || 0) + 1;
+            } else {
+                // 如果不是今天（或者第一次扫码），重置为 1
+                count = 1;
+                localStorage.setItem('lastScanDate', today);
+            }
+
+            // 保存最新次数到本地
+            localStorage.setItem('todayScanCount', count);
+            
+            // 更新到页面中间
+            document.getElementById('scanCount').innerText = count;
+        }
+
+        // 3. 更新屏幕下方的北京时间（精确到秒）
+        function updateBeijingTime() {
+            const now = new Date();
+            const timeString = new Intl.DateTimeFormat('zh-CN', {
+                timeZone: 'Asia/Shanghai',
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false // 24小时制
+            }).format(now);
+            
+            document.getElementById('bjTime').innerText = `北京时间：${timeString}`;
+        }
+
+        // 初始化执行
+        updateScanCount(); // 记录并显示次数
+        updateBeijingTime(); // 立即显示一次时间
+        setInterval(updateBeijingTime, 1000); // 每秒刷新一次时间
+    </script>
+</body>
+</html>
