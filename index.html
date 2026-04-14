@@ -24,25 +24,56 @@
             font-size: 24px;
             font-weight: bold;
             text-align: center;
-            padding: 20px;
+            padding: 30px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.05); /* 阴影更柔和 */
+            transform: translateY(-40px); /* 整体稍微往上移一点，避免显得拥挤 */
         }
 
         /* 强调数字的样式 */
         .highlight {
             color: #007AFF; /* 苹果蓝 */
-            font-size: 32px;
-            margin: 0 5px;
+            font-size: 40px; /* 数字再放大一点，更霸气 */
+            margin: 0 8px;
         }
 
-        /* 底部时间样式 */
-        .bottom-content {
+        /* --- 底部区域新样式 --- */
+        .bottom-container {
             position: absolute;
-            bottom: 30px;
-            font-size: 14px;
+            bottom: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* 醒目的北京时间（悬浮胶囊风格） */
+        .time-display {
+            font-size: 16px;
+            font-weight: bold;
+            color: #333;
+            background: #ffffff;
+            padding: 12px 24px;
+            border-radius: 30px; /* 圆角 */
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08); /* 悬浮阴影 */
+            margin-bottom: 15px; /* 和最下面文字的间距 */
+            border: 1px solid #eaeaea;
+        }
+        
+        /* 独立控制时间数字的颜色 */
+        .time-display span {
+            color: #FF3B30; /* 苹果红，极具警示和醒目感 */
+            font-family: monospace; /* 等宽字体，秒数跳动时不会左右乱晃 */
+            font-size: 18px;
+            margin-left: 5px;
+        }
+
+        /* 新增的一行专属文字样式 */
+        .footer-text {
+            font-size: 15px;
             color: #888;
+            font-weight: 800;
+            letter-spacing: 2px; /* 增加字间距，更有质感 */
         }
     </style>
 </head>
@@ -54,15 +85,17 @@
     </div>
 
     <!-- 屏幕下方显示区域 -->
-    <div class="bottom-content" id="bjTime">
-        北京时间：加载中...
+    <div class="bottom-container">
+        <!-- 变得更醒目的北京时间 -->
+        <div id="bjTime" class="time-display">北京时间：<span>加载中...</span></div>
+        <!-- 你要求新增的一行字 -->
+        <div class="footer-text">MTAK EDC SHOW 2026</div>
     </div>
 
     <script>
-        // 1. 获取并格式化当前北京时间的日期（用于判断是否跨天）
+        // 1. 获取并格式化当前北京时间的日期
         function getBeijingDate() {
             const now = new Date();
-            // 强制转换为东八区（北京时间）的日期字符串，格式如：2026-04-14
             return new Intl.DateTimeFormat('zh-CN', {
                 timeZone: 'Asia/Shanghai',
                 year: 'numeric',
@@ -78,22 +111,17 @@
             let count = localStorage.getItem('todayScanCount');
 
             if (storedDate === today) {
-                // 如果是今天，次数 +1
                 count = parseInt(count || 0) + 1;
             } else {
-                // 如果不是今天（或者第一次扫码），重置为 1
                 count = 1;
                 localStorage.setItem('lastScanDate', today);
             }
 
-            // 保存最新次数到本地
             localStorage.setItem('todayScanCount', count);
-            
-            // 更新到页面中间
             document.getElementById('scanCount').innerText = count;
         }
 
-        // 3. 更新屏幕下方的北京时间（精确到秒）
+        // 3. 更新屏幕下方的北京时间（带高亮样式）
         function updateBeijingTime() {
             const now = new Date();
             const timeString = new Intl.DateTimeFormat('zh-CN', {
@@ -107,13 +135,14 @@
                 hour12: false // 24小时制
             }).format(now);
             
-            document.getElementById('bjTime').innerText = `北京时间：${timeString}`;
+            // 注意这里：把时间字符串用 span 包裹起来，触发 CSS 里配置的红色字体和等宽效果
+            document.getElementById('bjTime').innerHTML = `北京时间：<span>${timeString}</span>`;
         }
 
         // 初始化执行
-        updateScanCount(); // 记录并显示次数
-        updateBeijingTime(); // 立即显示一次时间
-        setInterval(updateBeijingTime, 1000); // 每秒刷新一次时间
+        updateScanCount(); 
+        updateBeijingTime(); 
+        setInterval(updateBeijingTime, 1000); 
     </script>
 </body>
 </html>
